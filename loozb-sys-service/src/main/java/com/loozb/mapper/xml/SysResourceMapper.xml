@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loozb.mapper.SysResourceMapper">
+
+	<!-- 查询列表-->
+	<select id="selectIdPage" resultType="java.lang.Long">
+		SELECT id FROM sys_resource
+		<where>
+			<if test="cm.pid != null">
+				and (pid =  #{cm.pid} or id = #{cm.pid})
+			</if>
+			<if test="cm.keyword != null">
+				and (name like CONCAT('%',#{cm.keyword},'%') or identity like CONCAT('%',#{cm.keyword},'%'))
+			</if>
+			  and available = '1'
+		</where>
+		ORDER BY id DESC
+	</select>
+
+	<!-- 查询列表-->
+	<select id="selectPidPage" resultType="java.lang.Long">
+		SELECT id FROM sys_resource
+		<where>
+			<if test="cm.pid != null">
+				and (pid =  #{cm.pid} or id = #{cm.pid})
+			</if>
+			<if test="cm.available != null and cm.available != ''">
+				and available = #{cm.available}
+			</if>
+		</where>
+		ORDER BY id DESC
+	</select>
+
+</mapper>
