@@ -42,6 +42,7 @@ public interface Constants {
     public static final String TOKEN_KEY = CACHE_NAMESPACE + "TOKEN_KEY";
     /** permissioin_role**/
     public static final String SHIRO_REDIS_CACHE = "SHIRO_REDIS_CACHE:";
+    public static final String IMAGE_SERVER_BASE_URL = "http://images.loozb.com/";
     /** 日志表状态 */
     public interface JOBSTATE {
         /**
