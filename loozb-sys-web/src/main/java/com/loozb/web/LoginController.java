@@ -59,7 +59,8 @@ public class LoginController extends AbstractController<ISysProvider> {
 
             //获取角色信息
             Set<String> roles = null;
-            String roleCache = (String)CacheUtil.getCache().get("REDIS:ROLE:" + user.getAccount());
+            String roleCacheKey = "REDIS:ROLE:" + userId;
+            String roleCache = (String)CacheUtil.getCache().get(roleCacheKey);
             if(StringUtils.isNotBlank(roleCache)) {
                 roles = new HashSet<String>();
                 String[] arr = roleCache.split(",");
@@ -70,13 +71,14 @@ public class LoginController extends AbstractController<ISysProvider> {
                 Parameter rolesParameter = new Parameter("sysAuthService", "findRoles").setId(userId);
                 roles = (Set<String>)provider.execute(rolesParameter).getSet();
                 if(roles != null) {
-                    CacheUtil.getCache().set("REDIS:ROLE:" + user.getAccount(), StringUtils.join(roles.toArray(), ","));
+                    CacheUtil.getCache().set(roleCacheKey, StringUtils.join(roles.toArray(), ","));
                 }
             }
 
             //获取权限信息
             Set<String> permissions = null;
-            String permissionCache = (String)CacheUtil.getCache().get("REDIS:PERMISSION:" + user.getAccount());
+            String permissionCacheKey = "REDIS:PERMISSION:" + userId;
+            String permissionCache = (String)CacheUtil.getCache().get(permissionCacheKey);
             if(StringUtils.isNotBlank(permissionCache)) {
                 permissions = new HashSet<String>();
                 String[] arr = permissionCache.split(",");
@@ -87,20 +89,21 @@ public class LoginController extends AbstractController<ISysProvider> {
                 Parameter permissionsParameter = new Parameter("sysAuthService", "findPermissions").setId(userId);
                 permissions = (Set<String>)provider.execute(permissionsParameter).getSet();
                 if(permissions != null) {
-                    CacheUtil.getCache().set("REDIS:PERMISSION:" + user.getAccount(), StringUtils.join(permissions.toArray(), ","));
+                    CacheUtil.getCache().set(permissionCacheKey, StringUtils.join(permissions.toArray(), ","));
                 }
             }
 
             //获取资源信息
             List<SysResource> menus = null;
-            String menuCache = (String)CacheUtil.getCache().get("REDIS:MENU:" + user.getAccount());
+            String menuCacheKey = "REDIS:MENU:" + userId;
+            String menuCache = (String)CacheUtil.getCache().get(menuCacheKey);
             if(StringUtils.isNotBlank(menuCache)) {
                 menus = JsonUtils.jsonToList(menuCache, SysResource.class);
             } else {
                 Parameter resourceParameter = new Parameter("sysResourceService", "getMenus").setId(userId);
                 menus = (List<SysResource>)provider.execute(resourceParameter).getList();
                 if(menus != null) {
-                    CacheUtil.getCache().set("REDIS:MENU:" + user.getAccount(), JsonUtils.objectToJson(menus));
+                    CacheUtil.getCache().set(menuCacheKey, JsonUtils.objectToJson(menus));
                 }
             }
             return setSuccessModelMap(modelMap, new Authority(roles, permissions, menus, user));

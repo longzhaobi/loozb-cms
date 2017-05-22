@@ -17,5 +17,5 @@
 		<module>loozb-sys-model</module>
 		<module>loozb-sys-service</module>
 	</modules>
-	<!-- clean package -P build tomcat7:run-war-only -f pom-sys-service-server.xml -->
+	<!-- clean package -P dev tomcat7:run-war-only -f pom-sys-service-server.xml -->
 </project>

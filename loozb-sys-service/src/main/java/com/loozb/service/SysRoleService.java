@@ -98,6 +98,12 @@ public class SysRoleService extends BaseService<SysRole> {
              ) {
             SysUser user = sysUserService.queryById(auth.getUserId());
             String redisKey = Constants.CACHE_NAMESPACE + Constants.SHIRO_REDIS_CACHE + user.getUsername();
+            String roleCacheKey = "REDIS:ROLE:" + auth.getUserId();
+            String permissionCacheKey = "REDIS:PERMISSION:" + auth.getUserId();
+            String menuCacheKey = "REDIS:MENU:" + auth.getUserId();
+            CacheUtil.getCache().del(roleCacheKey);
+            CacheUtil.getCache().del(permissionCacheKey);
+            CacheUtil.getCache().del(menuCacheKey);
             CacheUtil.getCache().del(redisKey);
         }
     }
