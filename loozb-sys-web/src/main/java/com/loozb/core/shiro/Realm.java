@@ -71,7 +71,9 @@ public class Realm extends AuthorizingRealm {
 		logger.info("{} execute sysUserService.queryList end.", parameter.getNo());
 		if (list.size() == 1) {
 			SysUser user = (SysUser) list.get(0);
-
+			if(user.getLocked().equals("1")) {
+				throw new LockedAccountException("该账户已被锁定");
+			}
 			//获取前端传过来的用户密码
 			StringBuilder sb = new StringBuilder(100);
 			for (int i = 0; i < token.getPassword().length; i++) {
