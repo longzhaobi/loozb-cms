@@ -2,6 +2,7 @@ package com.loozb.web;
 
 import com.loozb.core.base.AbstractController;
 import com.loozb.core.base.Parameter;
+import com.loozb.core.listener.SessionListener;
 import com.loozb.core.support.Assert;
 import com.loozb.core.util.ParamUtil;
 import com.loozb.core.utils.PasswordUtil;
@@ -108,6 +109,8 @@ public class SysUserController extends AbstractController<ISysProvider> {
     @RequiresPermissions("user:view")
     public Object current(ModelMap modelMap) {
         Long userId = getCurrUser();
+        Integer number = SessionListener.getAllUserNumber();
+        modelMap.put("online", number);
         return super.get(modelMap, userId);
     }
 

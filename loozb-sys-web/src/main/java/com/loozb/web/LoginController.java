@@ -21,6 +21,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +43,9 @@ import java.util.Set;
 @RestController
 @Api(value = "登录接口", description = "登录接口")
 public class LoginController extends AbstractController<ISysProvider> {
+
+    @Autowired
+    private RedisOperationsSessionRepository sessionRepository;
 
     public String getService() {
         return "sysUserService";
@@ -116,7 +121,10 @@ public class LoginController extends AbstractController<ISysProvider> {
     @ApiOperation(value = "用户登出")
     @PostMapping("/logout")
     public Object logout(ModelMap modelMap) {
-        SecurityUtils.getSubject().logout();
+//        SecurityUtils.getSubject().logout();
+        String sessionId = SecurityUtils.getSubject().getSession().getId().toString();
+        sessionRepository.delete(sessionId);
+        sessionRepository.cleanupExpiredSessions();
         return setSuccessModelMap(modelMap);
     }
 

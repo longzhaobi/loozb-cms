@@ -100,19 +100,23 @@ public class Realm extends AuthorizingRealm {
 		record.setAccount(account);
 		Parameter parameter = new Parameter("sysSessionService", "querySessionIdByAccount").setModel(record);
 		logger.info("{} execute querySessionIdByAccount start...", parameter.getNo());
+		//通过当前帐号去sys_session查询到用户SESSION信息，一般就一条
 		List<?> sessionIds = provider.execute(parameter).getList();
 		logger.info("{} execute querySessionIdByAccount end.", parameter.getNo());
-		Subject currentUser = SecurityUtils.getSubject();
+		Subject currentUser = SecurityUtils.getSubject();//获取当前用户
 		Session session = currentUser.getSession();
-		String currentSessionId= session.getId().toString();
+		String currentSessionId= session.getId().toString();//当前在线sessionId
 		if (sessionIds != null) {
 			for (Object sessionId : sessionIds) {
 				record.setSessionId((String) sessionId);
+				//删除数据库
 				parameter = new Parameter("sysSessionService", "deleteBySessionId").setModel(record);
 				logger.info("{} execute deleteBySessionId start...", parameter.getNo());
 				provider.execute(parameter);
 				logger.info("{} execute deleteBySessionId end.", parameter.getNo());
+				//判断当前在线sessionId是否和当前用户所拥有的SessionId相同
 				if (!currentSessionId.equals(sessionId)) {
+					//强制踢人下线
 					sessionRepository.delete((String) sessionId);
 					sessionRepository.cleanupExpiredSessions();
 				}
