@@ -2,6 +2,7 @@ package com.loozb.service;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.loozb.core.base.BaseService;
+import com.loozb.core.util.CacheUtil;
 import com.loozb.core.util.ParamUtil;
 import com.loozb.model.*;
 import org.apache.commons.lang3.StringUtils;
@@ -44,16 +45,25 @@ public class SysAuthService extends BaseService<SysAuth> {
         if(userId == null) {
             return Collections.emptySet();
         }
-        Set<String> sets = new HashSet<String>();
-        // 获取用户角色关联表
-        List<SysAuth> authList = queryByUserId(userId);
-        for (SysAuth auth: authList ) {
-            SysRole role = sysRoleService.queryById(auth.getRoleId());
-            if(role != null) {
-                sets.add(role.getRole());
+        Set<String> roles = new HashSet<String>();
+        String roleCacheKey = "REDIS:ROLE:" + userId;
+        String roleCache = (String) CacheUtil.getCache().get(roleCacheKey);
+        if (StringUtils.isNotBlank(roleCache)) {
+            String[] arr = roleCache.split(",");
+            for (String a : arr) {
+                roles.add(a);
+            }
+        } else {
+            // 获取用户角色关联表
+            List<SysAuth> authList = queryByUserId(userId);
+            for (SysAuth auth : authList) {
+                SysRole role = sysRoleService.queryById(auth.getRoleId());
+                if (role != null) {
+                    roles.add(role.getRole());
+                }
             }
         }
-        return sets;
+        return roles;
     }
 
     /**
@@ -80,29 +90,38 @@ public class SysAuthService extends BaseService<SysAuth> {
         if (userId == null) {
             return Collections.emptySet();
         }
-        Set<String> sets = new HashSet<String>();
-        //获取用户角色关联表得到用户角色信息
-        List<SysAuth> authList = queryByUserId(userId);
-        for (SysAuth auth: authList ) {
-            //通过角色获取资源和对应的权限信息，多个权限以逗号分割
-            List<SysRoleResourcePermission> srrsp = sysRoleResourcePermissionService.findSrrpByRoleId(auth.getRoleId());
-            for (SysRoleResourcePermission srr : srrsp) {
-                //第一步，先根据资源ID去获取资源实体
-                SysResource resource = sysResourceService.queryById(srr.getResourceId());
-                //第二部，获得资源实体后，再根据权限ID去获取权限集合，然后组装
-                List<SysPermission> permissions = null;
-                if(srr.getPermissionIds() != null) {
-                    permissions = sysPermissionService.findPermissionByIds(srr.getPermissionIds());
-                }
-                if(null != permissions && resource != null) {
-                    //第三部，然后循环组装权限信息（格式:role:create）
-                    for (SysPermission per : permissions) {
-                        sets.add(resource.getIdentity() + ":" + per.getPermission());
+        Set<String> permissionSet = new HashSet<String>();
+        String permissionCacheKey = "REDIS:PERMISSION:" + userId;
+        String permissionCache = (String) CacheUtil.getCache().get(permissionCacheKey);
+        if (StringUtils.isNotBlank(permissionCache)) {
+            String[] arr = permissionCache.split(",");
+            for (String a : arr) {
+                permissionSet.add(a);
+            }
+        } else {
+            //获取用户角色关联表得到用户角色信息
+            List<SysAuth> authList = queryByUserId(userId);
+            for (SysAuth auth : authList) {
+                //通过角色获取资源和对应的权限信息，多个权限以逗号分割
+                List<SysRoleResourcePermission> srrsp = sysRoleResourcePermissionService.findSrrpByRoleId(auth.getRoleId());
+                for (SysRoleResourcePermission srr : srrsp) {
+                    //第一步，先根据资源ID去获取资源实体
+                    SysResource resource = sysResourceService.queryById(srr.getResourceId());
+                    //第二部，获得资源实体后，再根据权限ID去获取权限集合，然后组装
+                    List<SysPermission> permissions = null;
+                    if (srr.getPermissionIds() != null) {
+                        permissions = sysPermissionService.findPermissionByIds(srr.getPermissionIds());
+                    }
+                    if (null != permissions && resource != null) {
+                        //第三部，然后循环组装权限信息（格式:role:create）
+                        for (SysPermission per : permissions) {
+                            permissionSet.add(resource.getIdentity() + ":" + per.getPermission());
+                        }
                     }
                 }
             }
         }
-        return sets;
+        return permissionSet;
     }
 
     public void allot(Map<String, Object> params) {

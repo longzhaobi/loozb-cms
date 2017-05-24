@@ -43,6 +43,8 @@ public interface Constants {
     /** permissioin_role**/
     public static final String SHIRO_REDIS_CACHE = "SHIRO_REDIS_CACHE:";
     public static final String IMAGE_SERVER_BASE_URL = "http://images.loozb.com/";
+    //保存用户登录记录
+    public static final String REDIS_SESSION = "REDIS:SESSION:";
     /** 日志表状态 */
     public interface JOBSTATE {
         /**

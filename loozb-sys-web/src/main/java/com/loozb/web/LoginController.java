@@ -1,5 +1,7 @@
 package com.loozb.web;
 
+import com.baomidou.mybatisplus.plugins.Page;
+import com.loozb.core.Constants;
 import com.loozb.core.base.AbstractController;
 import com.loozb.core.base.Parameter;
 import com.loozb.core.config.Resources;
@@ -7,10 +9,8 @@ import com.loozb.core.exception.LoginException;
 import com.loozb.core.support.Assert;
 import com.loozb.core.support.HttpCode;
 import com.loozb.core.support.login.LoginHelper;
-import com.loozb.core.util.CacheUtil;
-import com.loozb.core.util.JsonUtils;
-import com.loozb.core.util.SecurityUtil;
-import com.loozb.core.util.WebUtil;
+import com.loozb.core.util.*;
+import com.loozb.core.utils.PasswordUtil;
 import com.loozb.model.Login;
 import com.loozb.model.SysResource;
 import com.loozb.model.SysUser;
@@ -22,17 +22,11 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.session.data.redis.RedisOperationsSessionRepository;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 用户登录
@@ -44,9 +38,6 @@ import java.util.Set;
 @Api(value = "登录接口", description = "登录接口")
 public class LoginController extends AbstractController<ISysProvider> {
 
-    @Autowired
-    private RedisOperationsSessionRepository sessionRepository;
-
     public String getService() {
         return "sysUserService";
     }
@@ -54,77 +45,76 @@ public class LoginController extends AbstractController<ISysProvider> {
     // 登录
     @ApiOperation(value = "用户登录")
     @PostMapping("/login")
-    public Object login(@ApiParam(required = true, value = "登录帐号和密码") Login user, ModelMap modelMap,
-                        HttpServletRequest request) {
-        Assert.notNull(user.getAccount(), "ACCOUNT");
-        Assert.notNull(user.getPassword(), "PASSWORD");
-        if (LoginHelper.login(user.getAccount(), user.getPassword())) {
-            request.setAttribute("msg", "[" + user.getAccount() + "]登录成功.");
-            Long userId = (Long) WebUtil.getCurrentUser();
+    public Object login(ModelMap modelMap,
+                        @ApiParam(required = true, value = "登录帐号") @RequestParam(value = "account") String account,
+                        @ApiParam(required = true, value = "登录密码") @RequestParam(value = "password") String password) {
+        Assert.notNull(account, "ACCOUNT");
+        Assert.notNull(password, "PASSWORD");
 
-            //获取角色信息
-            Set<String> roles = null;
-            String roleCacheKey = "REDIS:ROLE:" + userId;
-            String roleCache = (String)CacheUtil.getCache().get(roleCacheKey);
-            if(StringUtils.isNotBlank(roleCache)) {
-                roles = new HashSet<String>();
-                String[] arr = roleCache.split(",");
-                for (String a : arr) {
-                    roles.add(a);
-                }
-            } else {
+        Map<String, Object> params = ParamUtil.getMap();
+        params.put("account", account);
+
+        Parameter parameter = new Parameter("sysUserService", "queryList").setMap(params);
+        logger.info("{} execute sysUserService.queryList start...", parameter.getNo());
+        List<?> list = provider.execute(parameter).getList();
+        logger.info("{} execute sysUserService.queryList end.", parameter.getNo());
+        if (list.size() == 1) {
+            SysUser user = (SysUser) list.get(0);
+            if (user == null) {
+                throw new LoginException(Resources.getMessage("LOGIN_FAIL", account));
+            }
+
+            if ("1".equals(user.getLocked())) {
+                throw new LoginException(Resources.getMessage("ACCOUNT_LOCKED", account));
+            }
+            Long userId = user.getId();
+            //判断该用户是否已经登录，如果已经登录，则强制对方下线
+            String token = WebUtil.getTokenByUserId(userId);
+            if (StringUtils.isNotBlank(token)) {
+                WebUtil.clear(token, userId);
+            }
+
+            if (user.getPassword().equals(PasswordUtil.decryptPassword(password, user.getSalt()))) {
+                //获取角色信息
                 Parameter rolesParameter = new Parameter("sysAuthService", "findRoles").setId(userId);
-                roles = (Set<String>)provider.execute(rolesParameter).getSet();
-                if(roles != null) {
-                    CacheUtil.getCache().set(roleCacheKey, StringUtils.join(roles.toArray(), ","));
-                }
-            }
+                Set<String> roles = (Set<String>) provider.execute(rolesParameter).getSet();
 
-            //获取权限信息
-            Set<String> permissions = null;
-            String permissionCacheKey = "REDIS:PERMISSION:" + userId;
-            String permissionCache = (String)CacheUtil.getCache().get(permissionCacheKey);
-            if(StringUtils.isNotBlank(permissionCache)) {
-                permissions = new HashSet<String>();
-                String[] arr = permissionCache.split(",");
-                for (String a : arr) {
-                    permissions.add(a);
-                }
-            } else {
+                //获取权限信息
                 Parameter permissionsParameter = new Parameter("sysAuthService", "findPermissions").setId(userId);
-                permissions = (Set<String>)provider.execute(permissionsParameter).getSet();
-                if(permissions != null) {
-                    CacheUtil.getCache().set(permissionCacheKey, StringUtils.join(permissions.toArray(), ","));
-                }
-            }
+                Set<String> permissions = (Set<String>) provider.execute(permissionsParameter).getSet();
 
-            //获取资源信息
-            List<SysResource> menus = null;
-            String menuCacheKey = "REDIS:MENU:" + userId;
-            String menuCache = (String)CacheUtil.getCache().get(menuCacheKey);
-            if(StringUtils.isNotBlank(menuCache)) {
-                menus = JsonUtils.jsonToList(menuCache, SysResource.class);
-            } else {
-                Parameter resourceParameter = new Parameter("sysResourceService", "getMenus").setId(userId);
-                menus = (List<SysResource>)provider.execute(resourceParameter).getList();
-                if(menus != null) {
-                    CacheUtil.getCache().set(menuCacheKey, JsonUtils.objectToJson(menus));
+                //获取资源信息
+                List<SysResource> menus = null;
+                String menuCacheKey = "REDIS:MENU:" + userId;
+                String menuCache = (String) CacheUtil.getCache().get(menuCacheKey);
+                if (StringUtils.isNotBlank(menuCache)) {
+                    menus = JsonUtils.jsonToList(menuCache, SysResource.class);
+                } else {
+                    Parameter resourceParameter = new Parameter("sysResourceService", "getMenus").setId(userId);
+                    menus = (List<SysResource>) provider.execute(resourceParameter).getList();
+                    if (menus != null) {
+                        CacheUtil.getCache().set(menuCacheKey, JsonUtils.objectToJson(menus));
+                    }
                 }
+
+                // 生成token
+                String accessToken = UUID.randomUUID().toString();
+                user.setPassword(null);
+                user.setSalt(null);
+
+                CacheUtil.getCache().set(Constants.REDIS_SESSION + "TOKEN:" + token, user);
+                CacheUtil.getCache().set(Constants.REDIS_SESSION + "ID:" + user.getId(), accessToken);
+
+                return setSuccessModelMap(modelMap, new Authority(roles, permissions, menus, user, accessToken));
             }
-            return setSuccessModelMap(modelMap, new Authority(roles, permissions, menus, user));
         }
-        request.setAttribute("msg", "[" + user.getAccount() + "]登录失败.");
-        throw new LoginException(Resources.getMessage("LOGIN_FAIL"));
+        return setModelMap(modelMap, HttpCode.LOGIN_FAIL, Resources.getMessage("LOGIN_FAIL", account));
     }
 
     // 登出
     @ApiOperation(value = "用户登出")
     @PostMapping("/logout")
     public Object logout(ModelMap modelMap) {
-//        SecurityUtils.getSubject().logout();
-        String sessionId = SecurityUtils.getSubject().getSession().getId().toString();
-        sessionRepository.delete(sessionId);
-        sessionRepository.cleanupExpiredSessions();
         return setSuccessModelMap(modelMap);
     }
 

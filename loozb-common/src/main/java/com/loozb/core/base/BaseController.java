@@ -39,7 +39,7 @@ public abstract class BaseController {
 
 	/** 获取当前用户Id */
 	protected Long getCurrUser() {
-		return WebUtil.getCurrentUser();
+		return 1L;
 	}
 
 	/** 设置成功响应代码 */

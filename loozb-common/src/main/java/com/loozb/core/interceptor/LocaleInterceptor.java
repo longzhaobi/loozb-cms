@@ -22,7 +22,8 @@ public class LocaleInterceptor extends BaseInterceptor {
         throws Exception {
         HttpSession session = request.getSession();
         // 设置客户端语言
-        Locale locale = (Locale)session.getAttribute("LOCALE");
+//        Locale locale = (Locale)session.getAttribute("LOCALE");
+        Locale locale = null;
         if (locale == null) {
             String language = request.getParameter("locale");
             if (StringUtils.isNotBlank(language)) {

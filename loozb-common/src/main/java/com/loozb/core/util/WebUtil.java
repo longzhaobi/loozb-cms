@@ -9,6 +9,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.alibaba.fastjson.JSONObject;
+import com.loozb.model.SysUser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +36,6 @@ public final class WebUtil {
     /**
      * 获取指定Cookie的值
      * 
-     * @param cookies cookie集合
      * @param cookieName cookie名字
      * @param defaultValue 缺省值
      * @return
@@ -45,77 +46,6 @@ public final class WebUtil {
             return defaultValue;
         }
         return cookie.getValue();
-    }
-
-    /** 保存当前用户 */
-    public static final void saveCurrentUser(Object user) {
-        setSession(Constants.CURRENT_USER, user);
-    }
-
-    /** 保存当前用户 */
-    public static final void saveCurrentUser(HttpServletRequest request, Object user) {
-        setSession(request, Constants.CURRENT_USER, user);
-    }
-
-    /** 获取当前用户 */
-    public static final Long getCurrentUser() {
-        Subject currentUser = SecurityUtils.getSubject();
-        if (null != currentUser) {
-            try {
-                Session session = currentUser.getSession();
-                if (null != session) {
-                    return (Long)session.getAttribute(Constants.CURRENT_USER);
-                }
-            } catch (InvalidSessionException e) {
-                logger.error(e);
-            }
-        }
-        return null;
-    }
-
-    /** 获取当前用户 */
-    public static final Object getCurrentUser(HttpServletRequest request) {
-        try {
-            HttpSession session = request.getSession();
-            if (null != session) {
-                return session.getAttribute(Constants.CURRENT_USER);
-            }
-        } catch (InvalidSessionException e) {
-            logger.error(e);
-        }
-        return null;
-    }
-
-    /**
-     * 将一些数据放到ShiroSession中,以便于其它地方使用
-     * 
-     * @see 比如Controller,使用时直接用HttpSession.getAttribute(key)就可以取到
-     */
-    public static final void setSession(Object key, Object value) {
-        Subject currentUser = SecurityUtils.getSubject();
-        if (null != currentUser) {
-            Session session = currentUser.getSession();
-            if (null != session) {
-                session.setAttribute(key, value);
-            }
-        }
-    }
-
-    /**
-     * 将一些数据放到ShiroSession中,以便于其它地方使用
-     * 
-     * @see 比如Controller,使用时直接用HttpSession.getAttribute(key)就可以取到
-     */
-    public static final void setSession(HttpServletRequest request, String key, Object value) {
-        HttpSession session = request.getSession();
-        if (null != session) {
-            session.setAttribute(key, value);
-        }
-    }
-
-    /** 移除当前用户 */
-    public static final void removeCurrentUser(HttpServletRequest request) {
-        request.getSession().removeAttribute(Constants.CURRENT_USER);
     }
 
     /**
@@ -171,5 +101,47 @@ public final class WebUtil {
             }
         }
         return ip;
+    }
+
+    public static SysUser getUserByToken(String token) {
+        return (SysUser)CacheUtil.getCache().get(Constants.REDIS_SESSION + "TOKEN:" + token);
+    }
+
+    public static String getUsernameByToken(String token) {
+        SysUser user = getUserByToken(token);
+        if (user != null) {
+            String username = user.getUsername();
+            //刷新，防止正在使用的用户过期
+            CacheUtil.getCache().expire(Constants.REDIS_SESSION + "TOKEN:" + token, 1800);
+            CacheUtil.getCache().expire(Constants.REDIS_SESSION + "ID:" + user.getId(), 1800);
+            return username;
+        }
+        return null;
+    }
+
+    public static String getTokenByUserId(Long userId) {
+        String key = Constants.REDIS_SESSION + "ID:" + userId;
+        return (String)CacheUtil.getCache().get(key);
+    }
+
+    public static void clear(String token) {
+        WebUtil.clear(token, null);
+    }
+
+    public static void clear(Long userId) {
+        WebUtil.clear(null, userId);
+    }
+
+    public static void clear(String token, Long userId) {
+        if(StringUtils.isNotBlank(token)) {
+            CacheUtil.getCache().del(Constants.REDIS_SESSION + "TOKEN:" + token);
+        }
+        if(userId != null) {
+            CacheUtil.getCache().del(Constants.REDIS_SESSION + "ID:" + userId);
+        }
+    }
+
+    public static String getCurrentUser() {
+        return "数据暂时写死";
     }
 }

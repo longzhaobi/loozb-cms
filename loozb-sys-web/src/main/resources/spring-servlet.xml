@@ -47,7 +47,7 @@
 				<property name="maxMaliciousTimes" value="0" />
 				<property name="nextInterceptor">
 					<array>
-						<bean class="com.loozb.core.interceptor.LocaleInterceptor" />
+						<!--<bean class="com.loozb.core.interceptor.LocaleInterceptor" />-->
 						<bean class="com.loozb.core.interceptor.EventInterceptor" />
 					</array>
 				</property>

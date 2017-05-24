@@ -20,39 +20,39 @@ public class MaliciousRequestInterceptor extends BaseInterceptor {
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods", "POST,GET,PUT,OPTIONS,DELETE");
-		response.setHeader("Access-Control-Allow-Headers",
-				"x-requested-with,Access-Control-Allow-Origin,EX-SysAuthToken,EX-JSESSIONID");
-
-		String url = request.getMethod() + request.getRequestURI();
-		if (url.endsWith("/unauthorized") || url.endsWith("/forbidden")) {
-			return super.preHandle(request, response, handler);
-		}
-		HttpSession session = request.getSession();
-		String preRequest = (String) session.getAttribute(Constants.PREREQUEST);
-		Long preRequestTime = (Long) session.getAttribute(Constants.PREREQUEST_TIME);
-		if (preRequestTime != null && preRequest != null) { // 过滤频繁操作
-			if ((url.equals(preRequest) || allRequest)
-					&& System.currentTimeMillis() - preRequestTime < minRequestIntervalTime) {
-				Integer maliciousRequestTimes = (Integer) session.getAttribute(Constants.MALICIOUS_REQUEST_TIMES);
-				if (maliciousRequestTimes == null) {
-					maliciousRequestTimes = 1;
-				} else {
-					maliciousRequestTimes++;
-				}
-				session.setAttribute(Constants.MALICIOUS_REQUEST_TIMES, maliciousRequestTimes);
-				if (maliciousRequestTimes > maxMaliciousTimes) {
-					response.setStatus(HttpCode.MULTI_STATUS.value());
-					logger.warn("To intercept a malicious request : {}", url);
-					return false;
-				}
-			} else {
-				session.setAttribute(Constants.MALICIOUS_REQUEST_TIMES, 0);
-			}
-		}
-		session.setAttribute(Constants.PREREQUEST, url);
-		session.setAttribute(Constants.PREREQUEST_TIME, System.currentTimeMillis());
+//		response.setHeader("Access-Control-Allow-Origin", "*");
+//		response.setHeader("Access-Control-Allow-Methods", "POST,GET,PUT,OPTIONS,DELETE");
+//		response.setHeader("Access-Control-Allow-Headers",
+//				"x-requested-with,Access-Control-Allow-Origin,EX-SysAuthToken,EX-JSESSIONID");
+//
+//		String url = request.getMethod() + request.getRequestURI();
+//		if (url.endsWith("/unauthorized") || url.endsWith("/forbidden")) {
+//			return super.preHandle(request, response, handler);
+//		}
+//		HttpSession session = request.getSession();
+//		String preRequest = (String) session.getAttribute(Constants.PREREQUEST);
+//		Long preRequestTime = (Long) session.getAttribute(Constants.PREREQUEST_TIME);
+//		if (preRequestTime != null && preRequest != null) { // 过滤频繁操作
+//			if ((url.equals(preRequest) || allRequest)
+//					&& System.currentTimeMillis() - preRequestTime < minRequestIntervalTime) {
+//				Integer maliciousRequestTimes = (Integer) session.getAttribute(Constants.MALICIOUS_REQUEST_TIMES);
+//				if (maliciousRequestTimes == null) {
+//					maliciousRequestTimes = 1;
+//				} else {
+//					maliciousRequestTimes++;
+//				}
+//				session.setAttribute(Constants.MALICIOUS_REQUEST_TIMES, maliciousRequestTimes);
+//				if (maliciousRequestTimes > maxMaliciousTimes) {
+//					response.setStatus(HttpCode.MULTI_STATUS.value());
+//					logger.warn("To intercept a malicious request : {}", url);
+//					return false;
+//				}
+//			} else {
+//				session.setAttribute(Constants.MALICIOUS_REQUEST_TIMES, 0);
+//			}
+//		}
+//		session.setAttribute(Constants.PREREQUEST, url);
+//		session.setAttribute(Constants.PREREQUEST_TIME, System.currentTimeMillis());
 		return super.preHandle(request, response, handler);
 	}
 

@@ -75,7 +75,7 @@ public class EventInterceptor extends BaseInterceptor {
 		String path = request.getServletPath();
 		if (!path.contains("/read/") && !path.contains("/unauthorized") && !path.contains("/forbidden")) {
 			final SysEvent record = new SysEvent();
-			Long uid = WebUtil.getCurrentUser();
+//			Long uid = WebUtil.getCurrentUser();
 			record.setMethod(request.getMethod());
 			record.setRequestUri(request.getRequestURI());
 			record.setClientHost(WebUtil.getHost(request));
@@ -86,7 +86,7 @@ public class EventInterceptor extends BaseInterceptor {
 				record.setParameters(JSON.toJSONString(request.getParameterMap()));
 			}
 			record.setStatus(response.getStatus());
-			record.setCreateId(uid);
+			record.setCreateId(0L);
 			final String msg = (String) request.getAttribute("msg");
 			try {
 				HandlerMethod handlerMethod = (HandlerMethod) handler;

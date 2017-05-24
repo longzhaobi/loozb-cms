@@ -2,6 +2,7 @@ package com.loozb.model.ext;
 
 import com.loozb.model.Login;
 import com.loozb.model.SysResource;
+import com.loozb.model.SysUser;
 
 import java.util.List;
 import java.util.Set;
@@ -29,18 +30,24 @@ public class Authority {
     private List<SysResource> hasMenus;
 
     /**
+     * token
+     */
+    private String token;
+
+    /**
      * 用户信息
      */
-    private Login login;
+    private SysUser user;
 
     public Authority() {
     };
 
-    public Authority(Set<String> hasRoles, Set<String> hasPermissions, List<SysResource> hasMenus,Login login) {
+    public Authority(Set<String> hasRoles, Set<String> hasPermissions, List<SysResource> hasMenus,SysUser user, String token) {
         this.hasRoles = hasRoles;
         this.hasPermissions = hasPermissions;
         this.hasMenus = hasMenus;
-        this.login = login;
+        this.user = user;
+        this.token = token;
     }
 
     public Set<String> getHasRoles() {
@@ -67,12 +74,19 @@ public class Authority {
         this.hasMenus = hasMenus;
     }
 
-    public Login getLogin() {
-        return login;
+    public SysUser getUser() {
+        return user;
     }
 
-    public void setLogin(Login login) {
-        this.login = login;
+    public void setUser(SysUser user) {
+        this.user = user;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 }
