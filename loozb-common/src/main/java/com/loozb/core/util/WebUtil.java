@@ -1,25 +1,19 @@
 package com.loozb.core.util;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import com.alibaba.fastjson.JSONObject;
+import com.loozb.core.Constants;
 import com.loozb.model.SysUser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.InvalidSessionException;
-import org.apache.shiro.session.Session;
-import org.apache.shiro.subject.Subject;
-import com.loozb.core.Constants;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * Web层辅助类
@@ -143,5 +137,21 @@ public final class WebUtil {
 
     public static String getCurrentUser() {
         return "数据暂时写死";
+    }
+
+    /**
+     * 获取在线用户数量
+     * @return
+     */
+    public static Integer getAllUserNumber() {
+        String key = Constants.REDIS_SESSION + "TOKEN:*";
+        Set<Object> online = CacheUtil.getCache().getAll(key);
+        return online.size();
+    }
+
+    public static Set<Object> getAllUser() {
+        String key = Constants.REDIS_SESSION + "TOKEN:*";
+        Set<Object> online = CacheUtil.getCache().getAll(key);
+        return online;
     }
 }

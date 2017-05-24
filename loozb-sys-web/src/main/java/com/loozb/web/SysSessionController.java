@@ -1,8 +1,8 @@
 package com.loozb.web;
 
 import com.loozb.core.base.AbstractController;
-import com.loozb.core.listener.SessionListener;
 import com.loozb.core.util.ParamUtil;
+import com.loozb.core.util.WebUtil;
 import com.loozb.provider.ISysProvider;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +40,7 @@ public class SysSessionController extends AbstractController<ISysProvider> {
                       @ApiParam(required = false, value = "查询页数") @RequestParam(defaultValue = "20", value = "size") String size,
                       @ApiParam(required = false, value = "需要排序字段") @RequestParam(defaultValue = "id", value = "orderBy") String orderBy,
                       @ApiParam(required = false, value = "查询关键字") @RequestParam(value = "keyword", required = false) String keyword) {
-        Integer number = SessionListener.getAllUserNumber();
+        Integer number = WebUtil.getAllUserNumber();
         Map<String, Object> param = ParamUtil.getPageParams(current, size, keyword, orderBy);
         modelMap.put("userNumber", number); // 用户数大于会话数,有用户没有登录
         return super.query(modelMap, param);

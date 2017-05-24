@@ -1,9 +1,10 @@
 package com.loozb.web;
 
-import com.baomidou.mybatisplus.plugins.Page;
 import com.loozb.core.Constants;
 import com.loozb.core.base.AbstractController;
 import com.loozb.core.base.Parameter;
+import com.loozb.core.bind.annotation.CurrentUser;
+import com.loozb.core.bind.annotation.Token;
 import com.loozb.core.config.Resources;
 import com.loozb.core.exception.LoginException;
 import com.loozb.core.support.Assert;
@@ -11,7 +12,6 @@ import com.loozb.core.support.HttpCode;
 import com.loozb.core.support.login.LoginHelper;
 import com.loozb.core.util.*;
 import com.loozb.core.utils.PasswordUtil;
-import com.loozb.model.Login;
 import com.loozb.model.SysResource;
 import com.loozb.model.SysUser;
 import com.loozb.model.ext.Authority;
@@ -20,13 +20,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * 用户登录
@@ -102,7 +103,7 @@ public class LoginController extends AbstractController<ISysProvider> {
                 user.setPassword(null);
                 user.setSalt(null);
 
-                CacheUtil.getCache().set(Constants.REDIS_SESSION + "TOKEN:" + token, user);
+                CacheUtil.getCache().set(Constants.REDIS_SESSION + "TOKEN:" + accessToken, user);
                 CacheUtil.getCache().set(Constants.REDIS_SESSION + "ID:" + user.getId(), accessToken);
 
                 return setSuccessModelMap(modelMap, new Authority(roles, permissions, menus, user, accessToken));
@@ -114,7 +115,9 @@ public class LoginController extends AbstractController<ISysProvider> {
     // 登出
     @ApiOperation(value = "用户登出")
     @PostMapping("/logout")
-    public Object logout(ModelMap modelMap) {
+    public Object logout(ModelMap modelMap, HttpServletRequest request, @CurrentUser SysUser user, @Token String token) {
+        System.out.println(user.getId());
+        System.out.println(token);
         return setSuccessModelMap(modelMap);
     }
 

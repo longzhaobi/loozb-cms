@@ -25,7 +25,9 @@ public interface Constants {
     /** 客户端主题 */
     public static final String WEBTHEME = "webTheme";
     /** 当前用户 */
-    public static final String CURRENT_USER = "CURRENT_USER";
+    public static final String CURRENT_USER = "user";
+    /** 当前TOKEN */
+    public static final String CURRENT_TOKEN = "token";
     /** 上次请求地址 */
     public static final String PREREQUEST = "PREREQUEST";
     /** 上次请求时间 */

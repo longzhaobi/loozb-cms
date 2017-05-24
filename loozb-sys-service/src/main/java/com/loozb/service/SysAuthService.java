@@ -62,6 +62,7 @@ public class SysAuthService extends BaseService<SysAuth> {
                     roles.add(role.getRole());
                 }
             }
+            CacheUtil.getCache().set(roleCacheKey, StringUtils.join(roles.toArray(), ","));
         }
         return roles;
     }
@@ -120,6 +121,7 @@ public class SysAuthService extends BaseService<SysAuth> {
                     }
                 }
             }
+            CacheUtil.getCache().set(permissionCacheKey, StringUtils.join(permissionSet.toArray(), ","));
         }
         return permissionSet;
     }

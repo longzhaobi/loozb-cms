@@ -1,6 +1,8 @@
 package com.loozb.core.shiro.filter;
 
+import com.loozb.core.util.CookieUtils;
 import com.loozb.core.util.WebUtil;
+import com.loozb.model.SysUser;
 import org.apache.shiro.web.filter.PathMatchingFilter;
 
 import javax.servlet.ServletRequest;
@@ -17,7 +19,10 @@ public class CurrentUserFilter extends PathMatchingFilter {
 	@Override
 	protected boolean onPreHandle(ServletRequest request,
 			ServletResponse response, Object mappedValue) throws Exception {
-		String accessToken = WebUtil.getCookieValue((HttpServletRequest)request, "access_token", null);
+		String token = CookieUtils.getCookieValue((HttpServletRequest)request, "token");
+		SysUser user = WebUtil.getUserByToken(token);
+		request.setAttribute("user", user);
+		request.setAttribute("token", token);
 		return true;
 	}
 }

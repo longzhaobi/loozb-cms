@@ -45,6 +45,7 @@
 		<property name="filters">
 			<util:map>
 				<entry key="stateAuth" value-ref="statelessAuthFilter"/>
+				<entry key="currentUser" value-ref="currentUserFilter"/>
 			</util:map>
 		</property>
 		<property name="filterChainDefinitions">
@@ -65,7 +66,7 @@
 				/configuration/*=anon
 				/*/configuration/*=anon
 				/webjars/**=anon
-				/** = stateAuth, currentUserFilter
+				/** = stateAuth, currentUser
 			</value>
 		</property>
 	</bean>

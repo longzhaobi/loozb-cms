@@ -25,7 +25,7 @@
 			</props>
 		</property>
 	</bean>
-	<!-- 扫描注解 -->
+	<!-- 扫描service注解 -->
 	<context:component-scan base-package="com.loozb">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 		<context:exclude-filter type="annotation" expression="org.springframework.cache.annotation.EnableCaching" />
