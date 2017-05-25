@@ -42,11 +42,15 @@ public interface Constants {
     public static final String ALLUSER_NUMBER = "SYSTEM:" + CACHE_NAMESPACE + "ALLUSER_NUMBER";
     /** TOKEN */
     public static final String TOKEN_KEY = CACHE_NAMESPACE + "TOKEN_KEY";
+    /** TOKEN */
+    public static final String TOKEN = "token";
     /** permissioin_role**/
     public static final String SHIRO_REDIS_CACHE = "SHIRO_REDIS_CACHE:";
     public static final String IMAGE_SERVER_BASE_URL = "http://images.loozb.com/";
     //保存用户登录记录
-    public static final String REDIS_SESSION = "REDIS:SESSION:";
+    public static final String REDIS_SESSION_ID = "REDIS:SESSION:ID:";
+    //保存用户登录记录
+    public static final String REDIS_SESSION_TOKEN = "REDIS:SESSION:TOKEN:";
     /** 日志表状态 */
     public interface JOBSTATE {
         /**

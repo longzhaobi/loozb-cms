@@ -15,6 +15,10 @@
 		delete from
 		sys_session where session_id=#{sessionId}
 	</delete>
+	<delete id="deleteByUserId" parameterType="java.lang.Long">
+		delete from
+		sys_session where user_id=#{userId}
+	</delete>
 	<select id="queryBySessionId" resultType="java.lang.Long">
 		select id from sys_session where session_id = #{sessionId}
 	</select>

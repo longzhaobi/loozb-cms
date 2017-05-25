@@ -19,17 +19,16 @@
 		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
 	</context:component-scan>
 
-	<mvc:annotation-driven>
-		<mvc:argument-resolvers>
-			<bean class="com.loozb.core.bind.method.CurrentUserMethodArgumentResolver" />
-		</mvc:argument-resolvers>
-	</mvc:annotation-driven>
 
 	<aop:config proxy-target-class="true"></aop:config>
 	<mvc:default-servlet-handler />
 
 
 	<mvc:annotation-driven>
+		<mvc:argument-resolvers>
+			<bean class="com.loozb.core.bind.method.CurrentUserMethodArgumentResolver" />
+			<bean class="com.loozb.core.bind.method.TokenMethodArgumentResolver" />
+		</mvc:argument-resolvers>
 		<mvc:message-converters>
 			<bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
 				<description>JSON转换器</description>

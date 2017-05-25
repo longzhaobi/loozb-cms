@@ -21,6 +21,7 @@ public class CurrentUserFilter extends PathMatchingFilter {
 			ServletResponse response, Object mappedValue) throws Exception {
 		String token = CookieUtils.getCookieValue((HttpServletRequest)request, "token");
 		SysUser user = WebUtil.getUserByToken(token);
+		WebUtil.currentUser = user.getId();
 		request.setAttribute("user", user);
 		request.setAttribute("token", token);
 		return true;

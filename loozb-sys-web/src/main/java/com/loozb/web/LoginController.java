@@ -13,6 +13,7 @@ import com.loozb.core.support.login.LoginHelper;
 import com.loozb.core.util.*;
 import com.loozb.core.utils.PasswordUtil;
 import com.loozb.model.SysResource;
+import com.loozb.model.SysSession;
 import com.loozb.model.SysUser;
 import com.loozb.model.ext.Authority;
 import com.loozb.provider.ISysProvider;
@@ -20,14 +21,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 用户登录
@@ -46,7 +47,7 @@ public class LoginController extends AbstractController<ISysProvider> {
     // 登录
     @ApiOperation(value = "用户登录")
     @PostMapping("/login")
-    public Object login(ModelMap modelMap,
+    public Object login(ModelMap modelMap, HttpServletRequest request, 
                         @ApiParam(required = true, value = "登录帐号") @RequestParam(value = "account") String account,
                         @ApiParam(required = true, value = "登录密码") @RequestParam(value = "password") String password) {
         Assert.notNull(account, "ACCOUNT");
@@ -103,21 +104,50 @@ public class LoginController extends AbstractController<ISysProvider> {
                 user.setPassword(null);
                 user.setSalt(null);
 
-                CacheUtil.getCache().set(Constants.REDIS_SESSION + "TOKEN:" + accessToken, user);
-                CacheUtil.getCache().set(Constants.REDIS_SESSION + "ID:" + user.getId(), accessToken);
-
+                CacheUtil.getCache().set(Constants.REDIS_SESSION_TOKEN + accessToken, user, 1800);
+                CacheUtil.getCache().set(Constants.REDIS_SESSION_ID + user.getId(), accessToken, 1800);
+                saveSession(account, request, accessToken, user);
                 return setSuccessModelMap(modelMap, new Authority(roles, permissions, menus, user, accessToken));
             }
         }
         return setModelMap(modelMap, HttpCode.LOGIN_FAIL, Resources.getMessage("LOGIN_FAIL", account));
     }
 
+    private void saveSession(String account, HttpServletRequest request, String accessToken, SysUser user) {
+        // 踢出用户
+        SysSession record = new SysSession();
+        record.setAccount(account);
+        Parameter parameter = new Parameter("sysSessionService", "querySessionIdByAccount").setModel(record);
+        logger.info("{} execute querySessionIdByAccount start...", parameter.getNo());
+        List<?> sessions = provider.execute(parameter).getList();
+        logger.info("{} execute querySessionIdByAccount end.", parameter.getNo());
+
+        //到达这一步时，说明用户已经在线了，此时通过account查处SysSessioin后，如果有值进行更新，如果没有新增
+        if(sessions != null && sessions.size() > 0) {
+            //删除
+            record.setUserId(user.getId());
+            parameter = new Parameter("sysSessionService", "deleteByUserId").setModel(record);
+            logger.info("{} execute deleteByUserId start...", parameter.getNo());
+            provider.execute(parameter);
+            logger.info("{} execute deleteByUserId end.", parameter.getNo());
+        }
+        // 保存用户
+        record.setSessionId(accessToken);
+        String host = WebUtil.getHost(request);
+        record.setIp(host);
+        record.setUserId(user.getId());
+        record.setStartTime(new Date());
+        parameter = new Parameter("sysSessionService", "update").setModel(record);
+        logger.info("{} execute sysSessionService.update start...", parameter.getNo());
+        provider.execute(parameter);
+        logger.info("{} execute sysSessionService.update end.", parameter.getNo());
+    }
+
     // 登出
     @ApiOperation(value = "用户登出")
     @PostMapping("/logout")
     public Object logout(ModelMap modelMap, HttpServletRequest request, @CurrentUser SysUser user, @Token String token) {
-        System.out.println(user.getId());
-        System.out.println(token);
+        WebUtil.clear(token, user.getId());
         return setSuccessModelMap(modelMap);
     }
 

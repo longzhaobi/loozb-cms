@@ -47,7 +47,7 @@ public class RedissonHelper implements CacheManager, ApplicationContextAware {
 
 	public final Object get(final String key) {
 		RBucket<Object> temp = getRedisBucket(key);
-		expire(temp, EXPIRE);
+//		expire(temp, EXPIRE);
 		return temp.get();
 	}
 

@@ -1,5 +1,6 @@
 package com.loozb.core.shiro.filter;
 
+import com.loozb.core.Constants;
 import com.loozb.core.shiro.token.StatelessToken;
 import com.loozb.core.util.CookieUtils;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +26,7 @@ public class StatelessAuthFilter extends AccessControlFilter {
 			ServletResponse servletResponse) throws Exception {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		String token = CookieUtils.getCookieValue(request, "token");
+		String token = CookieUtils.getCookieValue(request, Constants.TOKEN);
 		StatelessToken statelessToken = new StatelessToken(token);
 		try {
 			getSubject(servletRequest, servletResponse).login(statelessToken);

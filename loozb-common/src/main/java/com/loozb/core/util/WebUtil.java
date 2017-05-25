@@ -5,10 +5,12 @@ import com.loozb.model.SysUser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.shiro.session.InvalidSessionException;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -26,6 +28,13 @@ public final class WebUtil {
     }
 
     private static Logger logger = LogManager.getLogger();
+
+    public volatile static Long currentUser = 0L;
+
+    /** 获取当前用户 */
+    public static final Long getCurrentUser() {
+        return currentUser;
+    }
 
     /**
      * 获取指定Cookie的值
@@ -97,8 +106,28 @@ public final class WebUtil {
         return ip;
     }
 
-    public static SysUser getUserByToken(String token) {
-        return (SysUser)CacheUtil.getCache().get(Constants.REDIS_SESSION + "TOKEN:" + token);
+    /** 获取当前用户 */
+    public static final SysUser getCurrentUser(HttpServletRequest request) {
+        try {
+            return WebUtil.getUserByToken(getCurrentToken(request));
+        } catch (InvalidSessionException e) {
+            logger.error(e);
+        }
+        return null;
+    }
+
+    /** 获取当前TOken */
+    public static final String getCurrentToken(HttpServletRequest request) {
+        return WebUtil.getCookieValue(request, Constants.TOKEN, null);
+    }
+
+    public static final SysUser getUserByToken(String token) {
+        if(StringUtils.isNotBlank(token)) {
+            return (SysUser)CacheUtil.getCache().get(Constants.REDIS_SESSION_TOKEN + token);
+        } else {
+            return null;
+        }
+
     }
 
     public static String getUsernameByToken(String token) {
@@ -106,15 +135,15 @@ public final class WebUtil {
         if (user != null) {
             String username = user.getUsername();
             //刷新，防止正在使用的用户过期
-            CacheUtil.getCache().expire(Constants.REDIS_SESSION + "TOKEN:" + token, 1800);
-            CacheUtil.getCache().expire(Constants.REDIS_SESSION + "ID:" + user.getId(), 1800);
+            CacheUtil.getCache().expire(Constants.REDIS_SESSION_TOKEN + token, 1800);
+            CacheUtil.getCache().expire(Constants.REDIS_SESSION_ID + user.getId(), 1800);
             return username;
         }
         return null;
     }
 
     public static String getTokenByUserId(Long userId) {
-        String key = Constants.REDIS_SESSION + "ID:" + userId;
+        String key = Constants.REDIS_SESSION_ID + userId;
         return (String)CacheUtil.getCache().get(key);
     }
 
@@ -128,15 +157,11 @@ public final class WebUtil {
 
     public static void clear(String token, Long userId) {
         if(StringUtils.isNotBlank(token)) {
-            CacheUtil.getCache().del(Constants.REDIS_SESSION + "TOKEN:" + token);
+            CacheUtil.getCache().del(Constants.REDIS_SESSION_TOKEN + token);
         }
         if(userId != null) {
-            CacheUtil.getCache().del(Constants.REDIS_SESSION + "ID:" + userId);
+            CacheUtil.getCache().del(Constants.REDIS_SESSION_ID + userId);
         }
-    }
-
-    public static String getCurrentUser() {
-        return "数据暂时写死";
     }
 
     /**
@@ -144,13 +169,17 @@ public final class WebUtil {
      * @return
      */
     public static Integer getAllUserNumber() {
-        String key = Constants.REDIS_SESSION + "TOKEN:*";
+        String key = Constants.REDIS_SESSION_TOKEN + "*";
         Set<Object> online = CacheUtil.getCache().getAll(key);
         return online.size();
     }
 
+    /**
+     * 获取所有在线用户实体
+     * @return
+     */
     public static Set<Object> getAllUser() {
-        String key = Constants.REDIS_SESSION + "TOKEN:*";
+        String key = Constants.REDIS_SESSION_TOKEN + "*";
         Set<Object> online = CacheUtil.getCache().getAll(key);
         return online;
     }

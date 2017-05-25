@@ -1,5 +1,6 @@
 package com.loozb.service;
 
+import com.baomidou.mybatisplus.plugins.Page;
 import com.loozb.core.base.BaseService;
 import com.loozb.core.util.CacheUtil;
 import com.loozb.core.util.InstanceUtil;
@@ -26,6 +27,14 @@ import java.util.Map;
 @Service
 @CacheConfig(cacheNames = "SysSession")
 public class SysSessionService extends BaseService<SysSession> {
+
+    @Override
+    public Page<SysSession> query(Map<String, Object> params) {
+        Page<SysSession> page = super.query(params);
+        List<SysSession> list = page.getRecords();
+        return page;
+    }
+
     @CachePut
     @Transactional
     public SysSession update(SysSession record) {
@@ -47,6 +56,10 @@ public class SysSessionService extends BaseService<SysSession> {
     // 系统触发,由系统自动管理缓存
     public void deleteBySessionId(final SysSession sysSession) {
         ((SysSessionMapper) mapper).deleteBySessionId(sysSession.getSessionId());
+    }
+
+    public void deleteByUserId(final SysSession session) {
+        ((SysSessionMapper) mapper).deleteByUserId(session.getUserId());
     }
 
     public List<String> querySessionIdByAccount(SysSession sysSession) {

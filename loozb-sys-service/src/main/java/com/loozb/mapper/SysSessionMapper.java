@@ -19,4 +19,6 @@ public interface SysSessionMapper extends BaseMapper<SysSession> {
     Long queryBySessionId(String sessionId);
 
     List<String> querySessionIdByAccount(String account);
+
+    void deleteByUserId(Long userId);
 }
