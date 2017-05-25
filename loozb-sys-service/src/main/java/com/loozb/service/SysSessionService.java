@@ -1,17 +1,20 @@
 package com.loozb.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.loozb.core.Constants;
 import com.loozb.core.base.BaseService;
 import com.loozb.core.util.CacheUtil;
 import com.loozb.core.util.InstanceUtil;
 import com.loozb.core.util.PropertiesUtil;
 import com.loozb.mapper.SysSessionMapper;
 import com.loozb.model.SysSession;
+import com.loozb.model.SysUser;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,20 @@ public class SysSessionService extends BaseService<SysSession> {
     public Page<SysSession> query(Map<String, Object> params) {
         Page<SysSession> page = super.query(params);
         List<SysSession> list = page.getRecords();
+        List<SysSession> sessions = new ArrayList<SysSession>();
+        //组装，查询是否在线
+        for (SysSession session: list) {
+            String token = session.getSessionId();
+            SysUser user = (SysUser)CacheUtil.getCache().get(Constants.REDIS_SESSION_TOKEN + token);
+            if(user != null) {
+                //说明在线
+                session.setOnline("1");
+            } else {
+                session.setOnline("0");
+            }
+            sessions.add(session);
+        }
+        page.setRecords(sessions);
         return page;
     }
 
