@@ -3,6 +3,7 @@ package com.loozb.web;
 import com.loozb.core.base.AbstractController;
 import com.loozb.core.util.ParamUtil;
 import com.loozb.core.util.WebUtil;
+import com.loozb.model.SysUser;
 import com.loozb.provider.ISysProvider;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,10 +47,12 @@ public class SysSessionController extends AbstractController<ISysProvider> {
         return super.query(modelMap, param);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{token}")
     @ApiOperation(value = "删除会话")
     @RequiresPermissions("session:remove")
-    public Object delete(ModelMap modelMap, Long id) {
-        return super.delete(modelMap, id);
+    public Object delete(ModelMap modelMap, @PathVariable String token) {
+        SysUser user = WebUtil.getUserByToken(token);
+        WebUtil.clear(token, user.getId());
+        return setSuccessModelMap(modelMap);
     }
 }

@@ -13,6 +13,9 @@
         <module>loozb-sys-model</module>
         <module>loozb-sys-service</module>
         <module>loozb-sys-web</module>
+        <module>loozb-blog-web</module>
+        <module>loozb-blog-model</module>
+        <module>loozb-blog-service</module>
     </modules>
     <!-- clean package -P build -f pom-sys-service-server.xml -->
     <!-- clean package -P build -f pom-sys-web-server.xml -->

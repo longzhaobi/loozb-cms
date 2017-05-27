@@ -16,7 +16,7 @@
     </build>
 
     <properties>
-        <server.port>8188</server.port>
+        <server.port>88</server.port>
     </properties>
 
     <dependencies>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loozb.mapper.blog.TbClassificationMapper">
+
+	<!-- 查询列表-->
+	<select id="selectIdPage" resultType="java.lang.Long">
+		SELECT id FROM tb_classification
+		<where>
+			<if test="cm.keyword != null">
+				and name like CONCAT('%',#{cm.keyword},'%')
+			</if>
+			and available ='1'
+		</where>
+		ORDER BY id DESC
+	</select>
+
+	<!-- 查询列表-->
+	<select id="queryArticleCount" resultType="java.lang.Integer">
+		select count(*) from tb_article where classification like CONCAT('%',#{id},'%') and confirm = '1'
+	</select>
+</mapper>
