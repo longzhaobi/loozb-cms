@@ -1,6 +1,0 @@
-com\loozb\model\ext\MoreArticle.class
-com\loozb\model\TbArticle.class
-com\loozb\model\TbMessage.class
-com\loozb\provider\IBlogProvider.class
-com\loozb\model\TbClassification.class
-com\loozb\model\TbComment.class
