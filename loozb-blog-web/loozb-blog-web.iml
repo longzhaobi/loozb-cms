@@ -23,6 +23,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="loozb-common" />
+    <orderEntry type="module" module-name="loozb-sys-model" />
     <orderEntry type="module" module-name="loozb-blog-model" />
     <orderEntry type="library" name="Maven: org.springframework:spring-webmvc:4.3.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:4.3.0.RELEASE" level="project" />

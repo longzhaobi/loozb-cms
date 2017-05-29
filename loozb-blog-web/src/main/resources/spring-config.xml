@@ -31,7 +31,8 @@
 		<context:exclude-filter type="annotation" expression="org.springframework.cache.annotation.EnableCaching" />
 	</context:component-scan>
 	<!-- dubbo -->
-	<dubbo:reference id="sysProvider" interface="com.loozb.provider.IBlogProvider" check="false" />
+	<dubbo:reference id="sysProvider" interface="com.loozb.provider.ISysProvider" check="false" />
+	<dubbo:reference id="blogProvider" interface="com.loozb.provider.IBlogProvider" check="false" />
 	<!-- 引入SPRING配置文件 -->
 	<import resource="spring/dubbo.xml" />
 	<!-- <import resource="spring/mq.xml"/> -->
