@@ -287,7 +287,7 @@
         <profile>
             <id>prod</id>
             <properties>
-                <sys.jdbc.config.path>file:/home/config/loozb/jdbc-sys.properties</sys.jdbc.config.path>
+                <sys.jdbc.config.path>file:/home/config/loozb/jdbc.properties</sys.jdbc.config.path>
                 <system.config.path>file:/home/config/loozb/system.properties</system.config.path>
             </properties>
             <build>
