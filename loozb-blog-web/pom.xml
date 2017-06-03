@@ -16,7 +16,7 @@
     </build>
 
     <properties>
-        <server.port>87</server.port>
+        <server.port>1087</server.port>
     </properties>
 
     <dependencies>

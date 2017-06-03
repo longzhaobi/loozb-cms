@@ -11,7 +11,6 @@ import com.loozb.core.support.Assert;
 import com.loozb.core.support.HttpCode;
 import com.loozb.core.support.login.LoginHelper;
 import com.loozb.core.util.*;
-import com.loozb.core.utils.PasswordUtil;
 import com.loozb.model.SysResource;
 import com.loozb.model.SysSession;
 import com.loozb.model.SysUser;
@@ -21,9 +20,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.apache.shiro.subject.Subject;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 

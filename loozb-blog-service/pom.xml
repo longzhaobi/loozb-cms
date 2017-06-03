@@ -16,7 +16,7 @@
     </build>
 
     <properties>
-        <server.port>187</server.port>
+        <server.port>1187</server.port>
     </properties>
 
     <!-- 生成model -->

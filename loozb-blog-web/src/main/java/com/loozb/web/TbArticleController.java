@@ -4,7 +4,6 @@ import com.loozb.core.base.AbstractController;
 import com.loozb.core.base.Parameter;
 import com.loozb.core.support.Assert;
 import com.loozb.core.util.ParamUtil;
-import com.loozb.model.SysUser;
 import com.loozb.model.TbArticle;
 import com.loozb.provider.IBlogProvider;
 import io.swagger.annotations.Api;
@@ -56,7 +55,6 @@ public class TbArticleController extends AbstractController<IBlogProvider> {
                         @ApiParam(required = false, value = "查询页数") @RequestParam(defaultValue = "20", value = "size") String size,
                         @ApiParam(required = false, value = "需要排序字段") @RequestParam(defaultValue = "id", value = "orderBy") String orderBy,
                         @ApiParam(required = false, value = "查询关键字") @RequestParam(value = "keyword", required = false) String keyword) {
-        System.out.println("进来了");
         return super.query(modelMap,  ParamUtil.getPageParams(current, size, keyword, orderBy));
     }
 

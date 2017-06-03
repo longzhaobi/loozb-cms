@@ -29,9 +29,6 @@ public class TbArticleService extends BaseService<TbArticle> {
             if(classification != null) {
                 article.setClassificationName(classification.getName());
             }
-            //增加浏览次数
-            article.setReadNum(article.getReadNum() + 1);
-            super.update(article);
         }
         return article;
     }

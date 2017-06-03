@@ -2,11 +2,10 @@ package com.loozb.web;
 
 import com.loozb.core.base.AbstractController;
 import com.loozb.core.base.Parameter;
-import com.loozb.core.listener.SessionListener;
 import com.loozb.core.support.Assert;
 import com.loozb.core.util.ParamUtil;
+import com.loozb.core.util.PasswordUtil;
 import com.loozb.core.util.WebUtil;
-import com.loozb.core.utils.PasswordUtil;
 import com.loozb.model.SysUser;
 import com.loozb.provider.ISysProvider;
 import io.swagger.annotations.Api;

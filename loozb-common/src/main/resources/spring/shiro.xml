@@ -52,6 +52,7 @@
 			<value>
 				/=anon
 				/app/**=anon
+				/anon/**=anon
 				/index.jsp=anon
 				/regin=anon
 				/login=anon
